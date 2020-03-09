@@ -1,5 +1,6 @@
 const express = require("express");
 const path = require("path");
+const usersRouter = require("./routes/users");
 const cookieParser = require("cookie-parser");
 const app = express();
 const port = 9000;
@@ -10,25 +11,17 @@ app.use(
 );
 
 app.use(cookieParser());
-
-app.use(function(req, res, next) {
-  req.loggedin = false;
-  if (req.cookies.user) {
-    req.loggedin = true;
-    req.username = req.cookies.user;
-    next();
-  } else {
-    res.send("not logged in!");
-  }
-});
-
 app.use(express.json());
+
+//app.set("views", path.join(__dirname, "templates"));
+app.set("view engine", "hbs");
+
+app.use("/users", usersRouter);
+app.use("/user", usersRouter);
 
 let userFunc = function(req, res) {
   res.send(req.params.userId + "<br />" + req.params.column);
 };
-
-app.get("/users/:userId/:column", userFunc);
 
 app.post("/jason/", (req, res) => {
   console.log(req.body);
@@ -59,6 +52,10 @@ app.get("/range/:low-:high", function(req, res) {
   out += "</ol></body></html>";
 
   res.send(out);
+});
+
+app.get("/", (req, res) => {
+  res.render("root", { title: "Home" });
 });
 
 app.get(/(cat|dog)/, (req, res) => {
